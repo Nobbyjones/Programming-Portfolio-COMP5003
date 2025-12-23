@@ -45,6 +45,8 @@ class MainWindow:
         if choice == "RSA Encryption":
             # Switch to RSA View
             RSAView(self.container, self.show_main_menu)
+        elif choice == "Fibonacci (DP)":
+            FibonacciAlgorithmi(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -71,13 +73,62 @@ class RSAView:
         self.user_input.pack(pady=5)
 
         # Action Buttons
-        tk.Button(self.parent, text="Encrypt", command=self.placeholder_action).pack(pady=5)
+        tk.Button(self.parent, text="Encrypt", command=self.encryption_Algorithm).pack(pady=5)
 
         # Navigation Button
         tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
 
-    def placeholder_action(self):
+    def encryption_Algorithm(self):
         print(f"Processing: {self.user_input.get()}")
+
+
+class FibonacciAlgorithmi:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        # Clear the menu to show RSA interface
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Fibonacci", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter number of steps in sequence").pack(pady=5)
+        self.user_input = tk.Entry(self.parent)
+        self.user_input.pack(pady=5)
+
+        # Action Buttons
+        tk.Button(self.parent, text="Calculate", command=self.solve).pack(pady=5)
+
+        self.result_label = tk.Label(self.parent, text="Result: ", font=("Arial", 12))
+        self.result_label.pack(pady=20)
+
+        # Navigation Button
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
+
+
+    def solve(self):#
+        if self.user_input.get != '': n = int(self.user_input.get().strip())
+        # Base cases
+        if n < 0:
+            return "Invalid Input"
+        if n == 0:
+            return 0
+        if n == 1:
+            return 1
+
+        # Initialize the DP table (array) with zeros
+        # This is the "Tabulation" method
+        fib_table = [0] * (n + 1)
+
+        # Set base values
+        fib_table[0] = 0
+        fib_table[1] = 1
+
+        # Fill the table iteratively
+        for i in range(2, n + 1):
+            fib_table[i] = fib_table[i - 1] + fib_table[i - 2]
+        result = fib_table[n]
+
+        self.result_label.config(text=f"Result: {result}")
 
 
 if __name__ == "__main__":
