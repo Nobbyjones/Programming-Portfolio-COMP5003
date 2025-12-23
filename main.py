@@ -47,6 +47,8 @@ class MainWindow:
             RSAView(self.container, self.show_main_menu)
         elif choice == "Fibonacci (DP)":
             FibonacciAlgorithmi(self.container, self.show_main_menu)
+        elif choice == "Sorting (Bubble/Selection)":
+            SortingAlgorithm(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -129,6 +131,58 @@ class FibonacciAlgorithmi:
         result = fib_table[n]
 
         self.result_label.config(text=f"Result: {result}")
+
+
+class SortingAlgorithm:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        # Clear the menu to show RSA interface
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Sorting Algorithms", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter Comma seperated list").pack(pady=5)
+        self.user_input = tk.Entry(self.parent, width=50)
+        self.user_input.pack(pady=5)
+
+
+        # Action Buttons
+        tk.Button(self.parent, text="Bubble", command=self.BubbleAlgorithm).pack(padx=5, pady=5)
+        tk.Button(self.parent, text="Selection", command=self.SelectionAlgorithm).pack(padx=10)
+
+        self.sortOrder = ttk.Combobox(self.parent, values=["Ascending", "Descending"])
+        self.sortOrder.pack(pady=5)
+
+        self.result_label = tk.Label(self.parent, text="Result: ", font=("Arial", 12))
+        self.result_label.pack(pady=20)
+
+        # Navigation Button
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
+
+    def BubbleAlgorithm(self):
+        order = self.sortOrder.get()[0]
+        self.input = [int(x.strip()) for x in self.user_input.get().split(',') if x.strip()]
+
+        if order ==  "A":
+            for j in range(len(self.input)):
+                for i in range(len(self.input) - 1):
+                    if self.input[i] > self.input[i + 1]:
+                        temporaryNumber = int(self.input[i + 1])
+                        self.input[i + 1] = self.input[i]
+                        self.input[i] = temporaryNumber
+        elif order == "D":
+            for j in range(len(self.input)):
+                for i in range(len(self.input) - 1):
+                    if self.input[i] < self.input[i + 1]:
+                        temporaryNumber = int(self.input[i + 1])
+                        self.input[i + 1] = self.input[i]
+                        self.input[i] = temporaryNumber
+
+        self.result_label.config(text=f"Result: {self.input}")
+
+    def SelectionAlgorithm(self):
+        print(type(self.input))
 
 
 if __name__ == "__main__":
