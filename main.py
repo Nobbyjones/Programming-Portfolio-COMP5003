@@ -182,7 +182,25 @@ class SortingAlgorithm:
         self.result_label.config(text=f"Result: {self.input}")
 
     def SelectionAlgorithm(self):
-        print(type(self.input))
+        order = self.sortOrder.get()[0]
+        self.input = [int(x.strip()) for x in self.user_input.get().split(',') if x.strip()]
+        n = len(self.input)
+
+        for i in range(n):
+            extreme_index = i
+
+            for j in range(i + 1, n):
+                if order == "A":
+                    if self.input[j] < self.input[extreme_index]:
+                        extreme_index = j
+                else:
+                    if self.input[j] > self.input[extreme_index]:
+                        extreme_index = j
+
+            if extreme_index != i:
+                self.input[i], self.input[extreme_index] = self.input[extreme_index], self.input[i]
+
+        self.result_label.config(text=f"Result: {self.input}")
 
 
 if __name__ == "__main__":
