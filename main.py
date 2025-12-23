@@ -49,6 +49,8 @@ class MainWindow:
             FibonacciAlgorithmi(self.container, self.show_main_menu)
         elif choice == "Sorting (Bubble/Selection)":
             SortingAlgorithm(self.container, self.show_main_menu)
+        elif choice == "Merge Sort (Divide & Conquer)":
+            MergeSort(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -162,6 +164,7 @@ class SortingAlgorithm:
 
     def BubbleAlgorithm(self):
         order = self.sortOrder.get()[0]
+        if order == "": order = "A"
         self.input = [int(x.strip()) for x in self.user_input.get().split(',') if x.strip()]
 
         if order ==  "A":
@@ -183,6 +186,7 @@ class SortingAlgorithm:
 
     def SelectionAlgorithm(self):
         order = self.sortOrder.get()[0]
+        if order == "": order = "A"
         self.input = [int(x.strip()) for x in self.user_input.get().split(',') if x.strip()]
         n = len(self.input)
 
@@ -201,6 +205,87 @@ class SortingAlgorithm:
                 self.input[i], self.input[extreme_index] = self.input[extreme_index], self.input[i]
 
         self.result_label.config(text=f"Result: {self.input}")
+
+
+class MergeSort:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        # Clear the menu to show RSA interface
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Divide and Conquer", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter Comma seperated list").pack(pady=5)
+        self.user_input = tk.Entry(self.parent, width=50)
+        self.user_input.pack(pady=5)
+
+        self.sortOrder = ttk.Combobox(self.parent, values=["Ascending", "Descending"])
+        self.sortOrder.pack(pady=5)
+        array = []
+        order  = ""
+
+
+        # Action Buttons
+        tk.Button(self.parent, text="Sort", command=lambda: self.sort(array, order)).pack(padx=10)
+
+
+
+        self.result_label = tk.Label(self.parent, text="Result: ", font=("Arial", 12))
+        self.result_label.pack(pady=20)
+
+        # Navigation Button
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
+
+    def sort(self, array, order):
+        #This try was from gemini to fix a bug, remember to note in write up
+        if not array:
+            try:
+                order = self.sortOrder.get()[0] if self.sortOrder.get() else "A"
+                array = [int(x.strip()) for x in self.user_input.get().split(',') if x.strip()]
+            except (ValueError, IndexError):
+                self.result_label.config(text="Error: Invalid Input")
+                return
+
+        n = len(array)
+
+        if n <= 1:
+            return array
+
+        mid = n // 2
+        left_half = array[:mid]
+        right_half = array[mid:]
+
+        left_sorted = self.sort(left_half, order)
+        right_sorted = self.sort(right_half, order)
+
+        final_merge = self.merge(left_sorted, right_sorted, order)
+
+        self.result_label.config(text=f"Result: {final_merge}")
+
+        return final_merge
+
+    def merge(self, left, right, order):
+        sorted_array = []
+        i = 0
+        j = 0
+        while i < len(left) and j < len(right):
+            if order == "A":
+                condition = left[i] <= right[j]
+            else:
+                condition = left[i] >= right[j]
+
+            if condition:
+                sorted_array.append(left[i])
+                i += 1
+            else:
+                sorted_array.append(right[j])
+                j += 1
+
+        sorted_array.extend(left[i:])
+        sorted_array.extend(right[j:])
+
+        return sorted_array
 
 
 if __name__ == "__main__":
