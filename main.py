@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
-import string
+from tkinter import ttk, messagebox
+import math
 import random
-from turtledemo.sorting_animate import randomize
 
 
 class MainWindow:
@@ -71,27 +70,77 @@ class RSAView:
         self.user_input = tk.Entry(self.parent, width=50)
         self.user_input.pack(pady=5)
 
-        tk.Label(self.parent, text="Enter Key to Encrypt/Decrypt With, (leave blank for random Key):").pack(pady=5)
+        tk.Label(self.parent, text="Enter 2 Keys to Encrypt/Decrypt Seperated by ',' (leave blank for random Keys):").pack(pady=5)
         self.user_key = tk.Entry(self.parent, width=50)
         self.user_key.pack(pady=5)
 
 
-        # Action Buttons
-        tk.Button(self.parent, text="Encrypt", command=self.encryption_Algorithm).pack(pady=5)
+        tk.Button(self.parent, text="Encrypt", command=self.get_Keys).pack(pady=5)
 
-        # Navigation Button
+        self.cipherText_label = tk.Label(self.parent,text="Encrypted text: ")
+        self.cipherText_label.pack(pady=5)
+        self.plainText_label = tk.Label(self.parent,text="Decrypted text: ")
+        self.plainText_label.pack(pady=5)
+
         tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
 
-    def encryption_Algorithm(self):
-        if self.user_key.get() == "":
-            # Source - https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
-            n = random.randint(1, 20)
-            self.key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(n))
-        else:
-            self.key = self.user_key.get()
+    def is_prime(self, n):
+        """Checks if a number is prime."""
+        if n < 2:
+            return False
+        for i in range(2, int(n ** 0.5) + 1):
+            if n % i == 0:
+                return False
+        return True
 
-        print(f"Key: {self.key}")
-        print(f"Input: {self.user_input.get()}")
+    def generate_keys(self, start, end):
+        """Returns a list of two distinct random prime numbers within a range."""
+        primes = []
+
+        while len(primes) < 2:
+            candidate = random.randint(start, end)
+            if self.is_prime(candidate) and candidate not in primes:
+                primes.append(candidate)
+        return primes
+
+    def get_Keys(self):
+        user_key_text = self.user_key.get()
+        if user_key_text == "":
+            primes = self.generate_keys(10, 1000)
+            self.p, self.q = primes[0], primes[1]
+        else:
+            try:
+                keys = list(map(int, user_key_text.split(',')))
+                self.p, self.q = keys[0], keys[1]
+                if not self.is_prime(self.p) or not self.is_prime(self.q):
+                    messagebox.showerror("Error", "Please enter two prime numbers")
+                    return
+            except:
+                messagebox.showerror("Error", "Format must be: prime, prime")
+                return
+
+        self.n = self.p * self.q
+        self.r = (self.p - 1) * (self.q - 1)
+
+        self.e = 65537
+        if self.r <= self.e: self.e = 3
+
+        try:
+            self.d = pow(self.e, -1, self.r)
+            self.process_rsa()
+        except ValueError:
+            messagebox.showerror("Error", "e and r are not coprime. Try different primes.")
+
+    def process_rsa(self):
+        message = self.user_input.get()
+        if not message: return
+
+        self.ciphertext = [pow(ord(char), self.e, self.n) for char in message]
+        self.cipherText_label.config(text=f"Encrypted text: {self.ciphertext}")
+
+        decrypted_chars = [chr(pow(char, self.d, self.n)) for char in self.ciphertext]
+        self.message = "".join(decrypted_chars)
+        self.plainText_label.config(text=f"Decrypted text: {self.message}")
 
 
 class FibonacciAlgorithm:
