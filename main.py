@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import string
 import random
+from turtledemo.sorting_animate import randomize
 
 
 class MainWindow:
@@ -70,15 +71,10 @@ class RSAView:
         self.user_input = tk.Entry(self.parent, width=50)
         self.user_input.pack(pady=5)
 
-        tk.Label(self.parent, text="Enter Key leave blank for random Key").pack(pady=5)
-        self.key_input = tk.Entry(self.parent, width=50)
-        if self.key_input == "":
-            # Source - https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
-            # Posted by Ignacio Vazquez-Abrams, modified by community. See post 'Timeline' for change history
-            # Retrieved 2025-12-23, License - CC BY-SA 4.0
-            n = random.randint(1, 20)
-            self.key_input = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(n))
-        self.user_input.pack(pady=5)
+        tk.Label(self.parent, text="Enter Key to Encrypt/Decrypt With, (leave blank for random Key):").pack(pady=5)
+        self.user_key = tk.Entry(self.parent, width=50)
+        self.user_key.pack(pady=5)
+
 
         # Action Buttons
         tk.Button(self.parent, text="Encrypt", command=self.encryption_Algorithm).pack(pady=5)
@@ -87,10 +83,18 @@ class RSAView:
         tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=20)
 
     def encryption_Algorithm(self):
-        print(f"Processing: {self.user_input.get()}")
+        if self.user_key.get() == "":
+            # Source - https://stackoverflow.com/questions/2257441/random-string-generation-with-upper-case-letters-and-digits
+            n = random.randint(1, 20)
+            self.key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(n))
+        else:
+            self.key = self.user_key.get()
+
+        print(f"Key: {self.key}")
+        print(f"Input: {self.user_input.get()}")
 
 
-class FibonacciAlgorithmi:
+class FibonacciAlgorithm:
     def __init__(self, parent, back_callback):
         self.parent = parent
         # Clear the menu to show RSA interface
@@ -517,7 +521,7 @@ class AlgorithmFactory:
         # This is much cleaner than a 10-line if/elif block
         views = {
             "RSA Encryption": RSAView,
-            "Fibonacci (DP)": FibonacciAlgorithmi,
+            "Fibonacci (DP)": FibonacciAlgorithm,
             "Sorting (Bubble/Selection)": SortingAlgorithm,
             "Merge Sort (Divide & Conquer)": MergeSort,
             "Shuffle Deck": DeckShuffle,
