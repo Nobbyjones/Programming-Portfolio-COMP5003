@@ -53,6 +53,8 @@ class MainWindow:
             MergeSort(self.container, self.show_main_menu)
         elif choice == "Shuffle Deck":
             DeckShuffle(self.container, self.show_main_menu)
+        elif choice == "Factorial":
+            FactorialRecursion(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -332,6 +334,45 @@ class DeckShuffle:
         for i, card in enumerate(shuffled_deck, 1):
             self.result_area.insert(tk.END, f"{i}. {card}\n")
 
+
+class FactorialRecursion:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Recursive Factorial", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter a non-negative integer:").pack(pady=5)
+        self.user_input = tk.Entry(self.parent)
+        self.user_input.pack(pady=5)
+
+        tk.Button(self.parent, text="Calculate", command=self.run_factorial, bg="purple", fg="white").pack(pady=10)
+
+        self.result_label = tk.Label(self.parent, text="Result: ", font=("Arial", 12))
+        self.result_label.pack(pady=20)
+
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=10)
+
+    def calculate_factorial(self, n):
+        if n == 0 or n == 1:
+            return 1
+        else:
+            return n * self.calculate_factorial(n - 1)
+
+    def run_factorial(self):
+        val = self.user_input.get().strip()
+        try:
+            n = int(val)
+            if n < 0:
+                self.result_label.config(text="Error: Enter a positive number")
+            elif n > 992:
+                self.result_label.config(text="Error: Number too large for recursion")
+            else:
+                result = self.calculate_factorial(n)
+                self.result_label.config(text=f"Result: {result}")
+        except ValueError:
+            self.result_label.config(text="Error: Invalid input")
 
 if __name__ == "__main__":
     root = tk.Tk()
