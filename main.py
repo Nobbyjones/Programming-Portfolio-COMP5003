@@ -33,7 +33,9 @@ class MainWindow:
             "Sorting (Bubble/Selection)",
             "Merge Sort (Divide & Conquer)",
             "Shuffle Deck",
-            "Factorial"
+            "Factorial",
+            "Search",
+            "Palindrome Counter"
         ], width=40)
         self.algorithm_choice.pack(pady=10)
 
@@ -55,6 +57,10 @@ class MainWindow:
             DeckShuffle(self.container, self.show_main_menu)
         elif choice == "Factorial":
             FactorialRecursion(self.container, self.show_main_menu)
+        elif choice == "Search":
+            SearchStatistics(self.container, self.show_main_menu)
+        elif choice == "Palindrome Counter":
+            PalindromeCounter(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -373,6 +379,138 @@ class FactorialRecursion:
                 self.result_label.config(text=f"Result: {result}")
         except ValueError:
             self.result_label.config(text="Error: Invalid input")
+
+
+class SearchStatistics:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Array Statistics", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter numbers separated by commas:").pack()
+        self.user_input = tk.Entry(self.parent, width=50)
+        self.user_input.pack(pady=5)
+
+        tk.Button(self.parent, text="Calculate Stats", command=self.process_stats).pack(pady=10)
+
+        # Result display area
+        self.result_box = tk.Label(self.parent, text="", justify="left", font=("Courier", 10))
+        self.result_box.pack(pady=10)
+
+        tk.Button(self.parent, text="Back", command=back_callback).pack()
+
+    def calculate_mode(self, arr):
+        counts = {}
+        for num in arr:
+            counts[num] = counts.get(num, 0) + 1
+
+        max_count = max(counts.values())
+        modes = [k for k, v in counts.items() if v == max_count]
+        return modes if len(modes) < len(arr) else "No unique mode"
+
+    def get_percentile(self, sorted_arr, percentile):
+        """ Calculates values at specific positions (Median, Q1, Q3) """
+        n = len(sorted_arr)
+        index = percentile * (n - 1)
+        lower = int(index)
+        upper = lower + 1
+
+        if upper >= n:
+            return sorted_arr[lower]
+
+        # Linear interpolation for more accurate quartiles
+        weight = index - lower
+        return sorted_arr[lower] * (1 - weight) + sorted_arr[upper] * weight
+
+    def process_stats(self):
+        raw_data = self.user_input.get()
+        # 1. Parse and Sort the data (Crucial for Median/Quartiles)
+        data = sorted([int(x.strip()) for x in raw_data.split(',') if x.strip()])
+
+        if not data: return
+
+        # 2. Calculations
+        smallest = data[0]
+        largest = data[-1]
+        mode = self.calculate_mode(data)
+        median = self.get_percentile(data, 0.5)
+        q1 = self.get_percentile(data, 0.25)
+        q3 = self.get_percentile(data, 0.75)
+
+        # 3. Display
+        res = (f"Smallest: {smallest}\n"
+                f"Largest:  {largest}\n"
+                f"Mode:     {mode}\n"
+                f"Median:   {median:.2f}\n"
+                f"1st Q (Q1): {q1:.2f}\n"
+                f"3rd Q (Q3): {q3:.2f}")
+        self.result_box.config(text=res)
+
+
+class PalindromeCounter:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Palindrome Substring Counter", font=("Arial", 18, "bold")).pack(pady=10)
+
+        tk.Label(self.parent, text="Enter a string:").pack(pady=5)
+        self.user_input = tk.Entry(self.parent, width=40)
+        self.user_input.pack(pady=5)
+
+        tk.Button(self.parent, text="Count Palindromes", command=self.run_logic, bg="teal", fg="white").pack(pady=10)
+
+        self.result_label = tk.Label(self.parent, text="Total Palindromes: ", font=("Arial", 12))
+        self.result_label.pack(pady=10)
+
+        # Area to show which substrings were found
+        self.found_area = tk.Text(self.parent, height=8, width=40)
+        self.found_area.pack(pady=10)
+
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=10)
+
+    def run_logic(self):
+        s = self.user_input.get().strip()
+        if not s: return ""
+
+        n = len(s)
+        # Memoization table: memo[i][j] will be True if s[i...j] is a palindrome
+        memo = [[False] * n for _ in range(n)]
+        count = 0
+        palindromes_found = []
+
+        # Substrings of length 1 (Single letters are always palindromes)
+        for i in range(n):
+            memo[i][i] = True
+            count += 1
+            palindromes_found.append(s[i])
+
+        # Substrings of length 2
+        for i in range(n - 1):
+            if s[i] == s[i + 1]:
+                memo[i][i + 1] = True
+                count += 1
+                palindromes_found.append(s[i:i + 2])
+
+        # Substrings of length 3 or more
+        # k is the length of the substring
+        for k in range(3, n + 1):
+            for i in range(n - k + 1):
+                j = i + k - 1  # Ending index
+
+                # Check if outer characters match AND inner part is a palindrome
+                if s[i] == s[j] and memo[i + 1][j - 1]:
+                    memo[i][j] = True
+                    count += 1
+                    palindromes_found.append(s[i:j + 1])
+
+        # Update GUI
+        self.result_label.config(text=f"Total Palindromes: {count}")
+        self.found_area.delete('1.0', tk.END)
+        self.found_area.insert(tk.END, ", ".join(palindromes_found))
 
 if __name__ == "__main__":
     root = tk.Tk()
