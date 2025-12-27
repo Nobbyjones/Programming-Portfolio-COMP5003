@@ -32,8 +32,8 @@ class MainWindow:
             "Fibonacci (DP)",
             "Sorting (Bubble/Selection)",
             "Merge Sort (Divide & Conquer)",
-            "Palindrome Counter (DP/Memo)",
-            "Shuffle Deck"
+            "Shuffle Deck",
+            "Factorial"
         ], width=40)
         self.algorithm_choice.pack(pady=10)
 
@@ -51,6 +51,8 @@ class MainWindow:
             SortingAlgorithm(self.container, self.show_main_menu)
         elif choice == "Merge Sort (Divide & Conquer)":
             MergeSort(self.container, self.show_main_menu)
+        elif choice == "Shuffle Deck":
+            DeckShuffle(self.container, self.show_main_menu)
 
 
 class RSAView:
@@ -286,6 +288,49 @@ class MergeSort:
         sorted_array.extend(right[j:])
 
         return sorted_array
+
+
+class DeckShuffle:
+    def __init__(self, parent, back_callback):
+        self.parent = parent
+        for widget in self.parent.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.parent, text="Randomized Deck Shuffle", font=("Arial", 18, "bold")).pack(pady=10)
+
+        # Action Button
+        tk.Button(self.parent, text="Shuffle New Deck", command=self.display_shuffle, bg="blue", fg="white").pack(
+            pady=10)
+
+        # https://www.geeksforgeeks.org/python/python-tkinter-text-widget/
+        self.result_area = tk.Text(self.parent, height=12, width=50)
+        self.result_area.pack(pady=10)
+
+        tk.Button(self.parent, text="Back to Menu", command=back_callback).pack(pady=10)
+
+    def create_deck(self):
+        suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
+        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King', 'Ace']
+        return [f"{v} of {s}" for s in suits for v in values]
+
+    def shuffle(self, deck):
+        # https://www.geeksforgeeks.org/dsa/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/
+        # Implementation from scratch
+        n = len(deck)
+        for i in range(n - 1, 0, -1):
+            # Pick a random index from 0 to i
+            j = random.randint(0, i)
+            # Swap deck[i] with the element at random index
+            deck[i], deck[j] = deck[j], deck[i]
+        return deck
+
+    def display_shuffle(self):
+        deck = self.create_deck()
+        shuffled_deck = self.shuffle(deck)
+
+        self.result_area.delete('1.0', tk.END)
+        for i, card in enumerate(shuffled_deck, 1):
+            self.result_area.insert(tk.END, f"{i}. {card}\n")
 
 
 if __name__ == "__main__":
