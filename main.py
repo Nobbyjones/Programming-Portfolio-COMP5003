@@ -44,23 +44,17 @@ class MainWindow:
 
     def handle_execution(self):
         choice = self.algorithm_choice.get()
-        if choice == "RSA Encryption":
-            # Switch to RSA View
-            RSAView(self.container, self.show_main_menu)
-        elif choice == "Fibonacci (DP)":
-            FibonacciAlgorithmi(self.container, self.show_main_menu)
-        elif choice == "Sorting (Bubble/Selection)":
-            SortingAlgorithm(self.container, self.show_main_menu)
-        elif choice == "Merge Sort (Divide & Conquer)":
-            MergeSort(self.container, self.show_main_menu)
-        elif choice == "Shuffle Deck":
-            DeckShuffle(self.container, self.show_main_menu)
-        elif choice == "Factorial":
-            FactorialRecursion(self.container, self.show_main_menu)
-        elif choice == "Search":
-            SearchStatistics(self.container, self.show_main_menu)
-        elif choice == "Palindrome Counter":
-            PalindromeCounter(self.container, self.show_main_menu)
+
+        # Use the Factory to create the view
+        # We don't need if/elif anymore!
+        view = AlgorithmFactory.create_view(
+            choice,
+            self.container,
+            self.show_main_menu
+        )
+
+        if not view:
+            print(f"Error: Logic for {choice} not found.")
 
 
 class RSAView:
@@ -511,6 +505,33 @@ class PalindromeCounter:
         self.result_label.config(text=f"Total Palindromes: {count}")
         self.found_area.delete('1.0', tk.END)
         self.found_area.insert(tk.END, ", ".join(palindromes_found))
+
+
+class AlgorithmFactory:
+    # Requirement 10 Creational Design Pattern
+    # https://www.geeksforgeeks.org/python/factory-method-python-design-patterns/
+
+    @staticmethod
+    def create_view(choice, parent, back_callback):
+        # A dictionary mapping choices to class names
+        # This is much cleaner than a 10-line if/elif block
+        views = {
+            "RSA Encryption": RSAView,
+            "Fibonacci (DP)": FibonacciAlgorithmi,
+            "Sorting (Bubble/Selection)": SortingAlgorithm,
+            "Merge Sort (Divide & Conquer)": MergeSort,
+            "Shuffle Deck": DeckShuffle,
+            "Factorial": FactorialRecursion,
+            "Search": SearchStatistics,
+            "Palindrome Counter": PalindromeCounter
+        }
+
+        view_class = views.get(choice)
+
+        if view_class:
+            # Instantiate and return the object
+            return view_class(parent, back_callback)
+        return None
 
 if __name__ == "__main__":
     root = tk.Tk()
